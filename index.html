@@ -81,9 +81,11 @@
     <script type="module">
         import { GoogleGenAI } from '@google/generative-ai';
 
-        const GEMINI_API_KEY = "AIzaSyDamvWLONSm2yHF5JnAxFQwC7LDUg3s_gU"; 
-        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-
+// 2. Khai báo mô hình trực tiếp qua hàm getGenerativeModel (Không dùng từ khóa 'new')
+    const model = GoogleGenAI.getGenerativeModel({ 
+    apiKey: GEMINI_API_KEY, 
+    model: 'gemini-2.5-flash' 
+});
         let hondaContext = "";
         let chatHistory = [];
         let historicalLeads = new Set(); // Dùng Set để chống trùng lặp SĐT trong phiên

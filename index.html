@@ -27,7 +27,6 @@
         }
         #chat-header { background-color: var(--honda-red); color: var(--honda-white); padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; }
         #chat-header h1 { font-size: 1.15rem; font-weight: 600; }
-        #chat-header span { font-size: 0.8rem; opacity: 0.85; }
 
         #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
         .msg { padding: 12px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.45; max-width: 82%; word-wrap: break-word; }
@@ -70,34 +69,21 @@
         </div>
     </div>
 
-    <script type="importmap">
-      {
-        "imports": {
-          "@google/generative-ai": "https://esm.run/@google/generative-ai"
-        }
-      }
-    </script>
-
-    <script type="module">
-        import { GoogleGenAI } from '@google/generative-ai';
-
-// 2. Khai báo mô hình trực tiếp qua hàm getGenerativeModel (Không dùng từ khóa 'new')
-    const model = GoogleGenAI.getGenerativeModel({ 
-    apiKey: AIzaSyA2Z1Ru98OfQM1tBcGZBVZRrLMAU3i0np4, 
-    model: 'gemini-2.5-flash' 
-});
+    <script>
+        // CHẠY SCRIP THUẦN KHÔNG DÙNG TYPE=MODULE - ĐẬP TAN LỖI ĐƠ NÚT
+        const GEMINI_API_KEY = "AIzaSyA2Z1Ru98OfQM1tBcGZBVZRrLMAU3i0np4"; 
         let hondaContext = "";
         let chatHistory = [];
-        let historicalLeads = new Set(); // Dùng Set để chống trùng lặp SĐT trong phiên
+        let historicalLeads = new Set(); 
 
-        // Tự động load database từ các file tĩnh trong Repo
+        // Khởi động load database tĩnh từ Repo
         async function loadLocalDatabase() {
             try {
                 const resInv = await fetch('data/inventory.json').then(r => r.text());
                 const resPrice = await fetch('data/pricing_calc.json').then(r => r.text());
                 const resService = await fetch('data/service.json').then(r => r.text());
                 hondaContext = `=== DATA ĐẠI LÝ ===\n${resInv}\n${resPrice}\n${resService}`;
-                console.log("Hệ thống dữ liệu Honda Đồng Tháp đã nạp thành công!");
+                console.log("Database nạp thành công!");
             } catch (e) {
                 console.error("Lỗi nạp database:", e);
                 hondaContext = "Dữ liệu đại lý tạm thời chưa đồng bộ.";
@@ -105,7 +91,7 @@
         }
         loadLocalDatabase();
 
-        // Xử lý logic gửi tin nhắn chính
+        // Hàm xử lý gửi tin nhắn chính thức
         async function handleSendMessage() {
             const inputDel = document.getElementById('user-input');
             const text = inputDel.value.trim();
@@ -142,9 +128,19 @@
             Timon phản hồi:`;
 
             try {
-                const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
-                const response = await model.generateContent(systemPrompt);
-                const replyText = response.text;
+                // Sử dụng Endpoint Fetch chính thức để bẻ khóa lỗi bảo mật CORS trình duyệt
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: systemPrompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                const replyText = data.candidates[0].content.parts[0].text;
                 
                 removeThinkingMessage();
                 inputDel.disabled = false; 
@@ -161,7 +157,7 @@
             }
         }
 
-        // Tự động quét bắt số điện thoại và đẩy về Telegram ngầm
+        // Tự động quét bắt SĐT khách
         function checkAndSaveLead(inputText) {
             const phoneRegex = /(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})\b/g;
             const foundPhones = inputText.match(phoneRegex);
@@ -181,7 +177,7 @@
             }
         }
 
-        // Thực hiện lệnh POST đồng bộ về Bot Telegram của bạn
+        // Bắn tín hiệu real-time về Telegram thông báo có SĐT khách mới
         async function sendToTelegram(leadData) {
             const botToken = "8221429460:AAG5rdvIFqsw_7JisbLOqBafCZnDj2tjtJk";
             const chatId = "6063497942";
@@ -215,14 +211,12 @@
         function removeThinkingMessage() { const td = document.getElementById('thinking-indicator'); if (td) td.remove(); }
         function scrollToBottom() { const m = document.getElementById('messages'); m.scrollTop = m.scrollHeight; }
 
-        // == ĐOẠN ĐỊNH VỊ SỰ KIỆN CHUẨN - KHÔNG SỢ LỖI ĐƠ NÚT ==
-        document.addEventListener("DOMContentLoaded", () => {
-            document.getElementById("send-btn").addEventListener("click", handleSendMessage);
-            document.getElementById("user-input").addEventListener("keypress", (event) => {
-                if (event.key === 'Enter') {
-                    handleSendMessage();
-                }
-            });
+        // GẮN SỰ KIỆN KHÔNG CHẠY TRONG WINDOW/DOCUMENT LOAD - CLICK PHÁT ĂN NGAY KHÔNG SỢ ĐƠ MÔ-ĐUN
+        document.getElementById("send-btn").addEventListener("click", handleSendMessage);
+        document.getElementById("user-input").addEventListener("keypress", function(event) {
+            if (event.key === 'Enter') {
+                handleSendMessage();
+            }
         });
     </script>
 </body>

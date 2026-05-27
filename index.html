@@ -25,15 +25,9 @@
             border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 16px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
             display: flex; flex-direction: column; overflow: hidden;
         }
-        #chat-header { background-color: var(--honda-red); color: var(--honda-white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        #chat-header { background-color: var(--honda-red); color: var(--honda-white); padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; }
         #chat-header h1 { font-size: 1.15rem; font-weight: 600; }
         #chat-header span { font-size: 0.8rem; opacity: 0.85; }
-        
-        #export-btn {
-            background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255,255,255,0.4); color: white;
-            padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
-        }
-        #export-btn:hover { background: white; color: var(--honda-red); }
 
         #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
         .msg { padding: 12px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.45; max-width: 82%; word-wrap: break-word; }
@@ -59,7 +53,7 @@
                 <h1>Honda Ôtô Đồng Tháp</h1>
                 <span>Trợ lý ảo Timon trực tuyến</span>
             </div>
-            <button id="export-btn">Xuất Data 📑</button>
+            <div style="font-size: 1.6rem;">🚗</div>
         </div>
 
         <div id="messages">
@@ -92,16 +86,16 @@
 
         let hondaContext = "";
         let chatHistory = [];
-        let customerLeads = []; 
+        let historicalLeads = new Set(); // Dùng Set để chống trùng lặp SĐT trong phiên
 
-        // Load database từ Repo GitHub Pages công khai
+        // Tự động load database từ các file tĩnh trong Repo
         async function loadLocalDatabase() {
             try {
                 const resInv = await fetch('data/inventory.json').then(r => r.text());
                 const resPrice = await fetch('data/pricing_calc.json').then(r => r.text());
                 const resService = await fetch('data/service.json').then(r => r.text());
                 hondaContext = `=== DATA ĐẠI LÝ ===\n${resInv}\n${resPrice}\n${resService}`;
-                console.log("Database nạp thành công!");
+                console.log("Hệ thống dữ liệu Honda Đồng Tháp đã nạp thành công!");
             } catch (e) {
                 console.error("Lỗi nạp database:", e);
                 hondaContext = "Dữ liệu đại lý tạm thời chưa đồng bộ.";
@@ -109,7 +103,7 @@
         }
         loadLocalDatabase();
 
-        // Xử lý gửi tin nhắn
+        // Xử lý logic gửi tin nhắn chính
         async function handleSendMessage() {
             const inputDel = document.getElementById('user-input');
             const text = inputDel.value.trim();
@@ -165,47 +159,27 @@
             }
         }
 
-        // Lọc SĐT và tự động đồng bộ
+        // Tự động quét bắt số điện thoại và đẩy về Telegram ngầm
         function checkAndSaveLead(inputText) {
             const phoneRegex = /(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})\b/g;
             const foundPhones = inputText.match(phoneRegex);
 
             if (foundPhones) {
                 foundPhones.forEach(phone => {
-                    if (!customerLeads.some(lead => lead.phone === phone)) {
+                    if (!historicalLeads.has(phone)) {
+                        historicalLeads.add(phone);
                         const newLead = {
                             time: new Date().toLocaleString('vi-VN'),
                             phone: phone,
                             rawContent: inputText
                         };
-                        customerLeads.push(newLead);
                         sendToTelegram(newLead); 
                     }
                 });
             }
         }
 
-        // Xuất data CSV
-        function handleExportLeads() {
-            if (customerLeads.length === 0) {
-                alert("Hiện tại chưa có dữ liệu số điện thoại nào trong phiên chat này!");
-                return;
-            }
-            let csvContent = "\uFEFFTime,Số Điện Thoại,Nội Dung Khách Gõ\n";
-            customerLeads.forEach(lead => {
-                let cleanContent = lead.rawContent.replace(/,/g, " - ");
-                csvContent += `${lead.time},${lead.phone},${cleanContent}\n`;
-            });
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.setAttribute("href", URL.createObjectURL(blob));
-            link.setAttribute("download", `Data_Khach_Hang_Honda_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Bắn tin nhắn về Telegram ngầm
+        // Thực hiện lệnh POST đồng bộ về Bot Telegram của bạn
         async function sendToTelegram(leadData) {
             const botToken = "8221429460:AAG5rdvIFqsw_7JisbLOqBafCZnDj2tjtJk";
             const chatId = "6063497942";
@@ -226,6 +200,7 @@
             msgDiv.innerHTML = text.replace(/\n/g, '<br>');
             document.getElementById('messages').appendChild(msgDiv);
         }
+        
         function showThinkingMessage() {
             const thinkingDiv = document.createElement('div');
             thinkingDiv.id = 'thinking-indicator';
@@ -234,20 +209,19 @@
             document.getElementById('messages').appendChild(thinkingDiv);
             scrollToBottom();
         }
+        
         function removeThinkingMessage() { const td = document.getElementById('thinking-indicator'); if (td) td.remove(); }
         function scrollToBottom() { const m = document.getElementById('messages'); m.scrollTop = m.scrollHeight; }
 
-        // == ĐOẠN ĐỊNH VỊ SỰ KIỆN KHÔNG SỢ LỖI MODULE ĐƠ NÚT ==
+        // == ĐOẠN ĐỊNH VỊ SỰ KIỆN CHUẨN - KHÔNG SỢ LỖI ĐƠ NÚT ==
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("send-btn").addEventListener("click", handleSendMessage);
-            document.getElementById("export-btn").addEventListener("click", handleExportLeads);
             document.getElementById("user-input").addEventListener("keypress", (event) => {
                 if (event.key === 'Enter') {
                     handleSendMessage();
                 }
             });
         });
-              
     </script>
 </body>
 </html>

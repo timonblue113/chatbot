@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Honda Ôtô Đồng Tháp - Trợ Lý Ảo Timon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --honda-red: #cc0000;
+            --honda-black: #111111;
+            --honda-text: #222222;
+            --honda-white: #ffffff;
+            --bg-user-msg: #cc0000;
+            --bg-bot-msg: rgba(240, 242, 245, 0.9);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover; background-position: center; height: 100vh; display: flex; justify-content: center; align-items: center; padding: 15px;
+        }
+        #chat-box {
+            width: 100%; max-width: 480px; height: calc(100% - 20px); 
+            background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 16px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        #chat-header { background-color: var(--honda-red); color: var(--honda-white); padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; }
+        #chat-header h1 { font-size: 1.15rem; font-weight: 600; }
+        #chat-header span { font-size: 0.8rem; opacity: 0.85; }
+        #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
+        .msg { padding: 12px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.45; max-width: 82%; word-wrap: break-word; }
+        .user { background-color: var(--bg-user-msg); color: var(--honda-white); align-self: flex-end; border-bottom-right-radius: 4px; }
+        .bot { background-color: var(--bg-bot-msg); color: var(--honda-black); align-self: flex-start; border-top-left-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.05); }
+        #input-area { display: flex; padding: 15px; border-top: 1px solid rgba(0, 0, 0, 0.06); background-color: rgba(255, 255, 255, 0.95); align-items: center; }
+        #user-input { flex: 1; padding: 12px 20px; border: 1px solid rgba(0, 0, 0, 0.05); border-radius: 25px; outline: none; background-color: rgba(240, 242, 245, 0.8); }
+        #send-btn { background-color: var(--honda-red); color: var(--honda-white); border: none; width: 44px; height: 44px; margin-left: 10px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.15rem; box-shadow: 0 4px 10px rgba(204, 0, 0, 0.25); }
+    </style>
+</head>
+<body>
+
+    <div id="chat-box">
+        <div id="chat-header">
+            <div>
+                <h1>Honda Ôtô Đồng Tháp</h1>
+                <span>Trợ lý ảo Timon hệ thống tĩnh</span>
+            </div>
+            <div style="font-size: 1.6rem;">🚗</div>
+        </div>
+
+        <div id="messages">
+            <div class="msg bot">
+                🚗 Kính chào Anh/Chị! Tôi là <strong>Timon</strong>. Hệ thống dữ liệu từ Repo đã được đồng bộ trực tiếp.<br><br>
+                Hôm nay tôi có thể hỗ trợ Anh/Chị thông tin chi tiết về dòng xe nào ạ?
+            </div>
+        </div>
+
+        <div id="input-area">
+            <input type="text" id="user-input" placeholder="Hỏi Timon về xe Honda..." onkeypress="handleKeyPress(event)">
+            <button id="send-btn" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <script>
+        // CẤU HÌNH ĐẦU NÃO CHẠY THẲNG TRÊN GITHUB PAGES
+        const GEMINI_API_KEY = "AIzaSyDamvWLONSm2yHF5JnAxFQwC7LDUg3s_gU"; 
+        let hondaContext = "";
+        let chatHistory = [];
+
+        // Tự động đọc dữ liệu từ các file JSON trong repo khi khách vừa vào web
+        async function loadLocalDatabase() {
+            try {
+                // Đọc file tương đối từ thư mục data cạnh index.html trên GitHub Pages
+                const resInv = await fetch('data/inventory.json').then(r => r.text());
+                const resPrice = await fetch('data/pricing_calc.json').then(r => r.text());
+                const resService = await fetch('data/service.json').then(r => r.text());
+
+                hondaContext = `
+                === THÔNG SỐ VÀ GIÁ XE ===
+                ${resInv}
+                === TÀI CHÍNH LĂN BÁNH ===
+                ${resPrice}
+                === BẢO DƯỠNG NGHIỆP VỤ ===
+                ${resService}
+                `;
+                console.log("Hệ thống nạp dữ liệu từ Repo thành công!");
+            } catch (e) {
+                console.error("Lỗi nạp database:", e);
+                hondaContext = "Dữ liệu đại lý tạm thời chưa đồng bộ.";
+            }
+        }
+        loadLocalDatabase();
+
+        function handleKeyPress(event) { if (event.key === 'Enter') sendMessage(); }
+
+        async function sendMessage() {
+            const inputDel = document.getElementById('user-input');
+            const text = inputDel.value.trim();
+            if(!text) return; 
+
+            appendMessage(text, 'user');
+            inputDel.value = ''; 
+            scrollToBottom();
+
+            chatHistory.push(`Khách hàng: ${text}`);
+
+            // Cấu hình prompt ép tư duy AI ngay trên trình duyệt
+            const systemPrompt = `
+            Bạn là trợ lý ảo tên Timon của đại lý Honda Ôtô Đồng Tháp. Hãy dùng dữ liệu sau để tư vấn:
+            ${hondaContext}
+            Quy tắc: Trả lời tự nhiên, chuyên nghiệp. Không có trong data thì từ chối khéo (ví dụ: con Diễm, người lạ...). Luôn tìm cách xin số Zalo/SĐT để báo giá lăn bánh chi tiết.
+            Lịch sử chat: ${chatHistory.join("\n")}
+            Timon phản hồi:`;
+
+            try {
+                // Gọi thẳng đến Endpoint chính thức của Google không qua server trung gian
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: systemPrompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                const replyText = data.candidates[0].content.parts[0].text;
+                
+                appendMessage(replyText, 'bot');
+                chatHistory.push(`Timon: ${replyText}`);
+                scrollToBottom();
+
+            } catch (error) {
+                console.error(error);
+                appendMessage('Kết nối trực tiếp trục trặc. Anh/Chị vui lòng thử lại sau giây lát nhé!', 'bot');
+                scrollToBottom();
+            }
+        }
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('msg', sender);
+            msgDiv.innerHTML = text.replace(/\n/g, '<br>');
+            document.getElementById('messages').appendChild(msgDiv);
+        }
+        function scrollToBottom() { const m = document.getElementById('messages'); m.scrollTop = m.scrollHeight; }
+    </script>
+</body>
+</html>

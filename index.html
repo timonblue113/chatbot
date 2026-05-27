@@ -238,7 +238,7 @@
         function scrollToBottom() { const m = document.getElementById('messages'); m.scrollTop = m.scrollHeight; }
 
         // == ĐOẠN ĐỊNH VỊ SỰ KIỆN KHÔNG SỢ LỖI MODULE ĐƠ NÚT ==
-        window.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("send-btn").addEventListener("click", handleSendMessage);
             document.getElementById("export-btn").addEventListener("click", handleExportLeads);
             document.getElementById("user-input").addEventListener("keypress", (event) => {
@@ -247,6 +247,7 @@
                 }
             });
         });
+              
     </script>
 </body>
 </html>

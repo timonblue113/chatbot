@@ -29,7 +29,6 @@
         #chat-header h1 { font-size: 1.15rem; font-weight: 600; }
         #chat-header span { font-size: 0.8rem; opacity: 0.85; }
         
-        /* NÚT XUẤT DATA KHÁCH HÀNG */
         #export-btn {
             background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255,255,255,0.4); color: white;
             padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
@@ -65,7 +64,9 @@
 
         <div id="messages">
             <div class="msg bot">
-                🚗 Kính chào Anh/Chị! Tôi là <strong>Timon</strong>. Hôm nay tôi có thể hỗ trợ Anh/Chị thông tin chi tiết về dòng xe nào ạ?
+                🚗 Kính chào Anh/Chị! Tôi là <strong>Timon</strong> - Trợ lý công nghệ số của đại lý Honda Ôtô Đồng Tháp.<br><br>
+                Hôm nay tôi có thể hỗ trợ Anh/Chị thông tin chi tiết về dòng xe nào ạ?<br>
+                <em>(City, Civic, CR-V, HR-V, BR-V, Accord)</em>
             </div>
         </div>
 
@@ -75,20 +76,32 @@
         </div>
     </div>
 
-    <script>
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+      }
+    </script>
+
+    <script type="module">
+        import { GoogleGenAI } from '@google/generative-ai';
+
         const GEMINI_API_KEY = "AIzaSyDamvWLONSm2yHF5JnAxFQwC7LDUg3s_gU"; 
+        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
         let hondaContext = "";
         let chatHistory = [];
-        
-        // Mảng lưu trữ thông tin khách hàng lọc được trong phiên chat
         let customerLeads = []; 
 
+        // Khởi động đồng bộ dữ liệu Repo tĩnh
         async function loadLocalDatabase() {
             try {
                 const resInv = await fetch('data/inventory.json').then(r => r.text());
                 const resPrice = await fetch('data/pricing_calc.json').then(r => r.text());
                 const resService = await fetch('data/service.json').then(r => r.text());
-                hondaContext = `=== DATA ===\n${resInv}\n${resPrice}\n${resService}`;
+                hondaContext = `=== DATA ĐẠI LÝ ===\n${resInv}\n${resPrice}\n${resService}`;
+                console.log("Database nạp thành công!");
             } catch (e) {
                 console.error("Lỗi nạp database:", e);
                 hondaContext = "Dữ liệu đại lý tạm thời chưa đồng bộ.";
@@ -96,9 +109,9 @@
         }
         loadLocalDatabase();
 
-        function handleKeyPress(event) { if (event.key === 'Enter') sendMessage(); }
+        window.handleKeyPress = function(event) { if (event.key === 'Enter') window.sendMessage(); }
 
-        async function sendMessage() {
+        window.sendMessage = async function() {
             const inputDel = document.getElementById('user-input');
             const text = inputDel.value.trim();
             if(!text) return; 
@@ -108,27 +121,39 @@
             scrollToBottom();
 
             chatHistory.push(`Khách hàng: ${text}`);
-
-            // == HỆ THỐNG KIỂM TRA & LỌC THÔNG TIN LIÊN LẠC (LEAD CAPTURE) ==
             checkAndSaveLead(text);
 
             showThinkingMessage();
             inputDel.disabled = true; 
 
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-                
-                // Cấu hình System Instruction ép tư duy Sales trực tiếp
-                const systemPrompt = `Bạn là Timon - Sales Agent của Honda Ôtô Đồng Tháp. Dùng data sau để trả lời: ${hondaContext}\nQuy tắc: Thân thiện, khôn khéo gài xin SĐT. Lịch sử: ${chatHistory.join("\n")}\nTimon phản hồi:`;
+            const systemPrompt = `
+            Bạn là một Chuyên viên tư vấn ảo cao cấp tên là Timon, làm việc tại đại lý Ô tô Honda Đồng Tháp.
+            Nhiệm vụ của bạn là tư vấn bán hàng, giải đáp thông số, tính toán chi phí và chốt hẹn khách hàng mua xe dựa trên cơ sở dữ liệu dưới đây.
 
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt }] }] })
+            ---
+            CƠ SỞ DỮ LIỆU ĐẠI LÝ:
+            ${hondaContext}
+            ---
+
+            QUY TẮC TƯ DUY VÀ XỬ LÝ TOÁN HỌC (BẮT BUỘC):
+            1. Trò chuyện tự nhiên, chuyên nghiệp như một tư vấn viên ô tô lão luyện. KHÔNG trả lời rập khuôn.
+            2. Chỉ tư vấn trong dữ liệu được cung cấp. Nếu khách hỏi thông tin không có trong dữ liệu (ví dụ: con Diễm, thông tin bốc phét...), hãy lịch sự từ chối khéo và hướng cuộc trò chuyện về các dòng xe Honda.
+            3. Tính toán chi phí lăn bánh: Lấy giá niêm yết của xe từ inventory.json, tính thuế trước bạ 10%, phí biển số khu vực II (1,000,000đ cho Cao Lãnh) hoặc khu vực III (200,000đ cho Huyện), kết hợp cộng các phí cố định (Kiểm định: 230k, Đường bộ: 1560k, Bảo hiểm TNDS: 480.7k). In rõ ràng phép tính tổng ra màn hình.
+            4. Khéo léo thúc giục khách để lại số điện thoại/Zalo để gửi bảng tính ưu đãi.
+
+            Lịch sử cuộc trò chuyện:
+            ${chatHistory.join("\n")}
+
+            Timon phản hồi:`;
+
+            try {
+                // Gọi mô hình thông qua kiến trúc chuẩn SDK để Bypass rào cản CORS
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: systemPrompt,
                 });
 
-                const data = await response.json();
-                const replyText = data.candidates[0].content.parts[0].text;
+                const replyText = response.text;
                 
                 removeThinkingMessage();
                 inputDel.disabled = false; 
@@ -137,67 +162,55 @@
                 scrollToBottom();
 
             } catch (error) {
-                console.error(error);
+                console.error("API Error:", error);
                 removeThinkingMessage();
                 inputDel.disabled = false; 
-                appendMessage('Mạng lag quá, Anh/Chị thử lại giúp Timon nhé!', 'bot');
+                appendMessage('Hệ thống xử lý thông tin đang bận cập nhật dữ liệu bảng giá. Anh/Chị vui lòng thử lại sau giây lát hoặc để lại số điện thoại để Timon hỗ trợ ngay nhé! 🥺', 'bot');
                 scrollToBottom();
             }
         }
 
-        // == HÀM TỰ ĐỘNG PHÂN TÍCH VÀ TRÍCH XUẤT SĐT/THÔNG TIN KHÁCH ==
         function checkAndSaveLead(inputText) {
-            // Sử dụng Regex bắt mọi định dạng số điện thoại Việt Nam thông dụng (09x, 03x, 07x, 08x...)
             const phoneRegex = /(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})\b/g;
             const foundPhones = inputText.match(phoneRegex);
 
             if (foundPhones) {
                 foundPhones.forEach(phone => {
-                    // Kiểm tra xem số này đã được lưu trong phiên làm việc chưa
                     if (!customerLeads.some(lead => lead.phone === phone)) {
                         const newLead = {
                             time: new Date().toLocaleString('vi-VN'),
                             phone: phone,
-                            rawContent: inputText // Lưu nguyên văn câu chat để biết khách quan tâm xe gì
+                            rawContent: inputText
                         };
                         customerLeads.push(newLead);
-                        console.log("Đã lưu Lead mới:", newLead);
+                        console.log("Đã lưu dữ liệu khách hàng:", newLead);
                         
-                        // [TÙY CHỌN]: Bắn dữ liệu tự động về Telegram hoặc Google Sheets tại đây
-                        // sendToTelegram(newLead);
+                        // Kích hoạt tự động bắn thông tin về Telegram chat ngầm
+                        sendToTelegram(newLead);
                     }
                 });
             }
         }
 
-        // == HÀM XUẤT FILE CSV/EXCEL TÙY BIẾN THỦ CÔNG ==
-        function exportLeads() {
+        window.exportLeads = function() {
             if (customerLeads.length === 0) {
-                alert("Hiện tại chưa có khách hàng nào để lại số điện thoại trong phiên chat này!");
+                alert("Hiện tại chưa có dữ liệu khách hàng nào trong phiên làm việc này!");
                 return;
             }
-
-            // Tạo cấu trúc nội dung file CSV bằng mã hóa UTF-8 Bom để không bị lỗi font tiếng Việt khi mở bằng Excel
             let csvContent = "\uFEFFTime,Số Điện Thoại,Nội Dung Khách Gõ\n";
             customerLeads.forEach(lead => {
-                // Xóa bỏ dấu phẩy trong nội dung gốc tránh làm lệch cột CSV
                 let cleanContent = lead.rawContent.replace(/,/g, " - ");
                 csvContent += `${lead.time},${lead.phone},${cleanContent}\n`;
             });
-
-            // Tạo trigger tải file về máy khách
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Danh_Sach_Khach_Hang_Honda_${new Date().toISOString().slice(0,10)}.csv`);
-            link.style.visibility = 'hidden';
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", `Data_Khach_Hang_Honda_${new Date().toISOString().slice(0,10)}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // == HOẶC CHƠI HỆ TỰ ĐỘNG BẮN DATA VỀ TELEGRAM (NẾU MUỐN BẬT) ==
         async function sendToTelegram(leadData) {
             const botToken = "8221429460:AAG5rdvIFqsw_7JisbLOqBafCZnDj2tjtJk";
             const chatId = "6063497942";
@@ -209,7 +222,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' })
                 });
-            } catch (e) { console.error("Lỗi bắn Telegram:", e); }
+            } catch (e) { console.error("Lỗi đồng bộ Telegram:", e); }
         }
 
         function appendMessage(text, sender) {

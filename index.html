@@ -105,7 +105,7 @@
         <div id="chat-header">
             <div>
                 <h1>Honda Ôtô Đồng Tháp</h1>
-                <span>Trợ lý ảo Timon trực tuyến di động</span>
+                <span>Trợ lý ảo Thúy trực tuyến di động</span>
             </div>
             <div style="font-size: 1.5rem;">🚗</div>
         </div>
@@ -119,7 +119,7 @@
         </div>
 
         <div id="input-area">
-            <input type="text" id="user-input" placeholder="Hỏi Timon về giá xe, khuyến mãi, trả góp...">
+            <input type="text" id="user-input" placeholder="Hỏi Thúy về giá xe, khuyến mãi, trả góp...">
             <button type="button" id="send-btn">➤</button>
         </div>
     </div>
@@ -180,7 +180,7 @@
             const limitedHistory = String(chatHistory.slice(-4).join("\n"));
 
             const systemPrompt = `
-            Bạn là một Chuyên viên tư vấn ảo cao cấp tên là Timon, làm việc tại đại lý Ô tô Honda Đồng Tháp.
+            Bạn là một Chuyên viên tư vấn ảo cao cấp tên là Thúy, làm việc tại đại lý Ô tô Honda Đồng Tháp.
             Nhiệm vụ của bạn là tư vấn bán hàng, giải đáp thông số, tính toán chi phí, áp dụng các ưu đãi khuyến mãi và chốt hẹn khách hàng mua xe dựa trên cơ sở dữ liệu dưới đây.
 
             ---
@@ -197,7 +197,7 @@
             Lịch sử cuộc trò chuyện gần đây:
             ${limitedHistory}
 
-            Timon phản hồi:`;
+            Thúy phản hồi:`;
 
             try {
                 const response = await fetch(URL_ASK_TIMON, {
@@ -224,14 +224,14 @@
                 appendMessage(replyText, 'bot');
                 inputDel.focus();
                 
-                chatHistory.push(`Timon: ${replyText}`);
+                chatHistory.push(`Thúy: ${replyText}`);
                 scrollToBottom();
 
             } catch (error) {
                 console.error("API Error:", error);
                 removeThinkingMessage();
                 inputDel.disabled = false; 
-                appendMessage('Hệ thống xử lý thông tin đang bận cập nhật dữ liệu bảng giá. Anh/Chị vui lòng thử lại sau giây lát hoặc để lại số điện thoại để Timon hỗ trợ ngay nhé! 🥺', 'bot');
+                appendMessage('Hệ thống xử lý thông tin đang bận cập nhật dữ liệu bảng giá. Anh/Chị vui lòng thử lại sau giây lát hoặc để lại số điện thoại để Thúy hỗ trợ ngay nhé! 🥺', 'bot');
                 scrollToBottom();
             }
         }

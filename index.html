@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Honda Ôtô Đồng Tháp - Trợ Lý Ảo Timon</title>
+    <title>Honda Ôtô Đồng Tháp - Trợ Lý Ảo ThuyHonda </title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,11 +11,11 @@
             --honda-black: #111111;
             --honda-white: #ffffff;
             --bg-user-msg: #cc0000;
-            --bg-bot-msg: rgba(255, 255, 255, 0.95);
+            --bg-bot-msg: rgba(255, 255, 255, 0.96);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         
-        /* KHÓA CHẾT TOÀN TRANG: Tuyệt đối không cho cuộn màn hình chính bậy bạ */
+        /* KHÓA CHẾT TOÀN TRANG: Chống cuộn màn hình chính bậy bạ */
         html, body {
             height: 100%; width: 100%;
             overflow: hidden; 
@@ -24,34 +24,35 @@
             background-color: #000;
         }
         
-        /* HIỆU ỨNG ĐỔI CẢNH XE CHẠY TỚI CHẠY LUI PHÍA SAU NỀN */
+        /* HỆ THỐNG NỀN TĨNH: Tuyệt đối không di chuyển, chỉ mờ dần cross-fade */
+        #bg-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; overflow: hidden;
+        }
+        
         .bg-slider {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover; background-position: center;
-            z-index: 1; opacity: 0;
-            filter: brightness(0.5); /* Làm tối nhẹ nền để nổi bật khung chat red-black */
-            transform: scale(1.05) translateX(30px); /* Đẩy xe nhẹ qua phải trước khi chạy */
-            transition: opacity 1.5s ease-in-out;
+            opacity: 0;
+            filter: brightness(0.45); /* Làm tối nền để nổi bật khung chat */
+            /* CHỈ SỬ DỤNG OPACITY ĐỂ MỜ DẦN, KHÔNG DÙNG TRANSFORM HAY ANIMATION DI CHUYỂN */
+            transition: opacity 2.0s ease-in-out; 
+            z-index: 1;
         }
 
-        /* Khi ảnh kích hoạt: Hiện hình và kích hoạt chuyển động lao xe tới trước nhẹ nhàng */
+        /* Khi ảnh kích hoạt: Chỉ hiện hình lên tại chỗ, không động đậy */
         .bg-slider.active {
             opacity: 1;
-            animation: carDrive 8.5s ease-in-out forwards;
-        }
-
-        @keyframes carDrive {
-            0% { transform: scale(1.05) translateX(25px); }
-            100% { transform: scale(1.0) translateX(0px); }
+            z-index: 2;
         }
         
-        /* KHUNG CHAT ĐỨNG IM BỆ VỆ CHUẨN APP THƯƠNG MẠI */
+        /* KHUNG CHAT ĐỨNG IM BỆ VỆ: Chỉ cuộn nội dung bên trong messages */
         #chat-box {
             position: relative; z-index: 5;
             width: 100%; max-width: 460px; height: 100%;
-            background: rgba(245, 246, 248, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            background: rgba(248, 249, 251, 0.82); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65);
         }
 
         @media (min-width: 481px) {
@@ -62,13 +63,13 @@
         #chat-header h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.2px; }
         #chat-header span { font-size: 0.75rem; opacity: 0.85; display: block; margin-top: 2px; }
 
-        /* KHÓA MỤC NÀY: CHỈ CUỘN NỘI DUNG TRÒ CHUYỆN BÊN TRONG */
+        /* VÙNG CUỘN TIN NHẮN NỘI KHU: Chỉ vuốt ở đây */
         #messages { 
             flex: 1; padding: 20px 15px; 
-            overflow-y: auto; /* Kích hoạt cuộn nội khu */
+            overflow-y: auto; /* Kích hoạt cuộn */
             display: flex; flex-direction: column; gap: 14px; 
             scroll-behavior: smooth; 
-            -webkit-overflow-scrolling: touch; /* Vuốt mượt trên iPhone */
+            -webkit-overflow-scrolling: touch; 
         }
         
         .msg { padding: 11px 15px; border-radius: 18px; font-size: 0.93rem; line-height: 1.48; max-width: 85%; word-wrap: break-word; }
@@ -77,7 +78,7 @@
         
         #input-area { 
             display: flex; padding: 12px 15px; border-top: 1px solid rgba(0, 0, 0, 0.06); 
-            background-color: rgba(255, 255, 255, 0.98); align-items: center; gap: 10px; z-index: 10;
+            background-color: rgba(255, 255, 255, 0.99); align-items: center; gap: 10px; z-index: 10;
             padding-bottom: calc(12px + env(safe-area-inset-bottom)); 
         }
         #user-input { flex: 1; padding: 11px 18px; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 24px; outline: none; background-color: rgba(240, 242, 245, 0.85); font-size: 0.95rem; transition: all 0.2s; }
@@ -111,7 +112,7 @@
 
         <div id="messages">
             <div class="msg bot">
-                🚗 Kính chào Anh/Chị! Tôi là <strong>Timon</strong> - Trợ lý công nghệ số của đại lý Honda Ôtô Đồng Tháp.<br><br>
+                🚗 Kính chào Anh/Chị! Tôi là <strong>Thúy bán xe</strong> - Trợ lý công nghệ số của đại lý Honda Ôtô Đồng Tháp.<br><br>
                 Hôm nay tôi có thể hỗ trợ Anh/Chị thông tin chi tiết về giá xe, chi phí lăn bánh hay các **Chương trình khuyến mãi** của dòng xe nào ạ?<br>
                 <em>(City, Civic, CR-V, HR-V, BR-V, Accord)</em>
             </div>
@@ -131,12 +132,15 @@
         let chatHistory = [];
         let historicalLeads = new Set();
 
-        // LOGIC CHẠY XE ĐỔI CẢNH NỀN AUTOMATIC (8 GIÂY ĐỔI 1 LẦN)
+        // LOGIC ĐỔI CẢNH NỀN TĨNH cross-fade (8 giây đổi 1 lần, tuyệt đối không di chuyển)
         const sliders = document.querySelectorAll('.bg-slider');
         let currentBgIndex = 0;
         function changeBackground() {
+            // Mờ dần ảnh cũ
             sliders[currentBgIndex].classList.remove('active');
+            // Tính toán ảnh mới
             currentBgIndex = (currentBgIndex + 1) % sliders.length;
+            // Hiện dần ảnh mới tại chỗ
             sliders[currentBgIndex].classList.add('active');
         }
         setInterval(changeBackground, 8000);

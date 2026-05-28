@@ -85,7 +85,7 @@
         const _part2 = "xnCg=="; // Giữ nguyên phân rã chuẩn của Key gốc ban đầu
         
         function _getK() {
-            return atob(_part1 + _part2);
+            return atob(_part1 + _part2).trim();
         }
 
         const ai = new GoogleGenAI({ apiKey: _getK() });

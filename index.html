@@ -70,7 +70,6 @@
     </div>
 
     <script>
-        // ĐÃ CHUẨN HÓA: Định tuyến đầy đủ endpoint cho hệ thống Cloud Run Gen 2
         const URL_ASK_TIMON = "https://asktimon-udi5dknsya-uc.a.run.app/askTimon";
         const URL_SEND_LEAD = "https://sendlead-udi5dknsya-uc.a.run.app/sendLead";
 
@@ -78,7 +77,7 @@
         let chatHistory = [];
         let historicalLeads = new Set();
 
-        // Đồng bộ dữ liệu tệp tin từ Repo tĩnh của GitHub Pages
+        // Đồng bộ dữ liệu tĩnh từ thư mục data
         async function loadLocalDatabase() {
             try {
                 const resInv = await fetch('data/inventory.json').then(r => r.text());
@@ -93,7 +92,7 @@
         }
         loadLocalDatabase();
 
-        // Hàm xử lý gửi tin nhắn
+        // Xử lý gửi tin nhắn chính xác
         async function handleSendMessage() {
             const inputDel = document.getElementById('user-input');
             const text = inputDel.value.trim();
@@ -103,14 +102,15 @@
             inputDel.value = ''; 
             scrollToBottom();
 
-            chatHistory.push(`Khách hàng: ${text}`);
+            // Ép lịch sử bên khách dạng chuỗi tĩnh thuần túy
+            chatHistory.push(`Khách hàng: ${String(text)}`);
             checkAndSaveLead(text);
 
             showThinkingMessage();
             inputDel.disabled = true; 
 
-            // Giới hạn 4 câu gần nhất giúp dữ liệu truyền đi cực nhẹ, chống lỗi tràn chuỗi JSON
-            const limitedHistory = chatHistory.slice(-4).join("\n");
+            // Chỉ lấy 4 dòng hội thoại gần nhất, ép sang String tuyệt đối chống tràn JSON
+            const limitedHistory = String(chatHistory.slice(-4).join("\n"));
 
             const systemPrompt = `
             Bạn là một Chuyên viên tư vấn ảo cao cấp tên là Timon, làm việc tại đại lý Ô tô Honda Đồng Tháp.
@@ -133,7 +133,6 @@
             Timon phản hồi:`;
 
             try {
-                // Bắn dữ liệu lên Firebase
                 const response = await fetch(URL_ASK_TIMON, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -142,18 +141,26 @@
 
                 const data = await response.json();
                 
-                // ĐÃ FIX: Nhận diện cấu trúc truyền tải dữ liệu text siêu sạch từ Backend mới
+                // ĐÃ SỬA CHÍ MẠNG: Ép bốc trúng chuỗi text sạch bất kể cấu trúc lồng nhau của Axios
+                let replyText = "";
                 if (data && data.text) {
-                    const replyText = data.text;
-                    
-                    removeThinkingMessage();
-                    inputDel.disabled = false; 
-                    appendMessage(replyText, 'bot');
-                    chatHistory.push(`Timon: ${replyText}`);
-                    scrollToBottom();
+                    replyText = String(data.text);
+                } else if (data && data.data && data.data.text) {
+                    replyText = String(data.data.text);
+                } else if (typeof data === "string") {
+                    replyText = data;
                 } else {
-                    throw new Error("Lỗi đọc định dạng dữ liệu.");
+                    throw new Error("Không nhận diện cấu trúc chuỗi.");
                 }
+
+                // Giải phóng giao diện và in câu trả lời lên màn hình
+                removeThinkingMessage();
+                inputDel.disabled = false; 
+                appendMessage(replyText, 'bot');
+                
+                // ĐÃ FIX: Chỉ push CHUỖI chữ thuần túy tuyệt đối vào lịch sử chat để câu sau không bị nghẽn
+                chatHistory.push(`Timon: ${replyText}`);
+                scrollToBottom();
 
             } catch (error) {
                 console.error("API Error:", error);
@@ -184,7 +191,7 @@
             }
         }
 
-        // Bắn dữ liệu về Telegram ngầm qua Server
+        // Gửi data về Telegram ngầm
         async function sendToTelegram(leadData) {
             try {
                 await fetch(URL_SEND_LEAD, {

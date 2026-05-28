@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Honda Ôtô Đồng Tháp - Trợ Lý Ảo ThuyHonda </title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -15,16 +15,18 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         
-        /* KHÓA CHẾT TOÀN TRANG: Chống cuộn màn hình chính bậy bạ */
+        /* KHÓA CHẾT TOÀN TRANG: Sử dụng dvh để thích ứng động với bàn phím điện thoại */
         html, body {
-            height: 100%; width: 100%;
+            height: 100vh;
+            height: 100dvh; 
+            width: 100%;
             overflow: hidden; 
             position: relative;
             display: flex; justify-content: center; align-items: center;
             background-color: #000;
         }
         
-        /* HỆ THỐNG NỀN TĨNH: Tuyệt đối không di chuyển, chỉ mờ dần cross-fade */
+        /* HỆ THỐNG NỀN TĨNH */
         #bg-container {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 1; overflow: hidden;
@@ -34,61 +36,90 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover; background-position: center;
             opacity: 0;
-            filter: brightness(0.45); /* Làm tối nền để nổi bật khung chat */
+            filter: brightness(0.45);
             transition: opacity 2.0s ease-in-out; 
             z-index: 1;
         }
 
-        /* Khi ảnh kích hoạt */
         .bg-slider.active {
             opacity: 1;
             z-index: 2;
         }
         
-        /* KHUNG CHAT ĐÃ ĐƯỢC THU NGẮN LẠI VÀ TỐI ƯU MOBILE */
+        /* KHUNG CHAT CHUYÊN NGHIỆP: Tự thích ứng toàn màn hình trên Mobile, bệ vệ trên Desktop */
         #chat-box {
             position: relative; z-index: 5;
-            width: 95%; max-width: 600px; 
-            height: 85vh; /* Thu ngắn lại thành 75% chiều cao màn hình để gọn đẹp */
-            max-height: 680px;
-            background: rgba(248, 249, 251, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            width: 100%; 
+            height: 100vh;
+            height: 100dvh; /* Điền đầy màn hình mobile khi bật bàn phím */
+            background: rgba(248, 249, 251, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            border-radius: 24px; /* Bo góc trên cả mobile để giống app */
-            border: 1px solid rgba(255, 255, 255, 0.25);
         }
 
-        /* Tối ưu riêng cho màn hình desktop lớn hơn */
+        /* Giao diện Đẹp bệ vệ khi hiển thị trên Máy tính (Desktop) */
         @media (min-width: 481px) {
-            #chat-box { height: 80vh; width: 100%; }
+            #chat-box { 
+                width: 92%;
+                max-width: 430px; 
+                height: 85vh; 
+                max-height: 750px;
+                border-radius: 24px; 
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            }
         }
 
-        #chat-header { background-color: var(--honda-red); color: var(--honda-white); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 10; }
-        #chat-header h1 { font-size: 1.05rem; font-weight: 600; letter-spacing: 0.2px; }
-        #chat-header span { font-size: 0.75rem; opacity: 0.85; display: block; margin-top: 2px; }
+        /* FIX CỐ ĐỊNH TIÊU ĐỀ: Không bao giờ bị đẩy mất */
+        #chat-header { 
+            background-color: var(--honda-red); 
+            color: var(--honda-white); 
+            padding: 16px 20px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            z-index: 10; 
+            flex-shrink: 0; /* Khóa chết kích thước tiêu đề */
+        }
+        #chat-header h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.2px; }
+        #chat-header span { font-size: 0.78rem; opacity: 0.85; display: block; margin-top: 2px; }
 
-        /* VÙNG CUỘN TIN NHẮN NỘI KHU */
+        /* VÙNG CUỘN TIN NHẮN TỰ CO GIÃN ĐỘNG */
         #messages { 
-            flex: 1; padding: 15px 15px; 
+            flex: 1; 
+            padding: 16px; 
             overflow-y: auto; 
-            display: flex; flex-direction: column; gap: 12px; 
+            display: flex; flex-direction: column; gap: 14px; 
             scroll-behavior: smooth; 
             -webkit-overflow-scrolling: touch; 
         }
         
-        .msg { padding: 10px 14px; border-radius: 16px; font-size: 0.9rem; line-height: 1.45; max-width: 88%; word-wrap: break-word; }
+        .msg { padding: 11px 15px; border-radius: 18px; font-size: 0.95rem; line-height: 1.48; max-width: 85%; word-wrap: break-word; }
         .user { background-color: var(--bg-user-msg); color: var(--honda-white); align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 3px 8px rgba(204, 0, 0, 0.15); }
         .bot { background-color: var(--bg-bot-msg); color: var(--honda-black); align-self: flex-start; border-top-left-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.04); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); }
         
-        /* THANH NHẬP LIỆU ĐƯỢC LÀM TO DỄ BẤM TRÊN ĐIỆN THOẠI */
+        /* THANH NHẬP LIỆU CHUẨN ĐẸP TRÊN MOBILE */
         #input-area { 
-            display: flex; padding: 12px 14px; border-top: 1px solid rgba(0, 0, 0, 0.06); 
-            background-color: rgba(255, 255, 255, 0.99); align-items: center; gap: 10px; z-index: 10;
+            display: flex; 
+            padding: 12px 16px; 
+            border-top: 1px solid rgba(0, 0, 0, 0.06); 
+            background-color: rgba(255, 255, 255, 1); 
+            align-items: center; 
+            gap: 10px; 
+            z-index: 10;
+            flex-shrink: 0; /* Giữ nguyên kích thước thanh nhập liệu */
             padding-bottom: calc(12px + env(safe-area-inset-bottom)); 
         }
-        #user-input { flex: 1; padding: 12px 18px; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 24px; outline: none; background-color: rgba(240, 242, 245, 0.85); font-size: 0.95rem; transition: all 0.2s; }
+        #user-input { 
+            flex: 1; 
+            padding: 12px 18px; 
+            border: 1px solid rgba(0, 0, 0, 0.1); 
+            border-radius: 24px; 
+            outline: none; 
+            background-color: #f0f2f5; 
+            font-size: 1rem; /* Chống tự động zoom-in lỗi giao diện trên iOS */
+            transition: all 0.2s; 
+        }
         #user-input:focus { border-color: var(--honda-red); background-color: var(--honda-white); }
-        #send-btn { background-color: var(--honda-red); color: var(--honda-white); border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(204, 0, 0, 0.2); }
+        #send-btn { background-color: var(--honda-red); color: var(--honda-white); border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(204, 0, 0, 0.15); }
         #user-input:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .thinking-msg { display: flex; gap: 5px; padding: 12px 18px; border-radius: 18px; background-color: var(--bg-bot-msg); align-self: flex-start; border-top-left-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.03); width: fit-content; }
@@ -112,7 +143,7 @@
                 <h1>Honda Ôtô Đồng Tháp</h1>
                 <span>Trợ lý ảo Thúy trực tuyến di động</span>
             </div>
-            <div style="font-size: 1.4rem;">🚗</div>
+            <div style="font-size: 1.5rem;">🚗</div>
         </div>
 
         <div id="messages">
@@ -137,7 +168,7 @@
         let chatHistory = [];
         let historicalLeads = new Set();
 
-        // LOGIC ĐỔI CẢNH NỀN TĨNH cross-fade (8 giây đổi 1 lần)
+        // LOGIC ĐỔI CẢNH NỀN TĨNH
         const sliders = document.querySelectorAll('.bg-slider');
         let currentBgIndex = 0;
         function changeBackground() {

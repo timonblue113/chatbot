@@ -69,10 +69,10 @@
         </div>
     </div>
 
-   <script>
-        // ĐÃ THÔNG MẠCH: Dán chính xác 2 đường link Firebase Functions thực tế của bạn vào đây
-        const URL_ASK_TIMON = "https://asktimon-udi5dknsya-uc.a.run.app";
-        const URL_SEND_LEAD = "https://sendlead-udi5dknsya-uc.a.run.app";
+ <script>
+        // ĐÃ FIX: Thêm đuôi endpoint /askTimon và /sendLead vào chính xác link thực tế của bạn
+        const URL_ASK_TIMON = "https://asktimon-udi5dknsya-uc.a.run.app/askTimon";
+        const URL_SEND_LEAD = "https://sendlead-udi5dknsya-uc.a.run.app/sendLead";
 
         let hondaContext = "";
         let chatHistory = [];
@@ -133,7 +133,7 @@
             Timon phản hồi:`;
 
             try {
-                // BẮN TIN NHẮN QUA SERVER TRUNG GIAN FIREBASE (KHÔNG CÒN LỘ API KEY)
+                // BẰN TIN NHẮN QUA SERVER TRUNG GIAN FIREBASE (KHÔNG CÒN LỘ API KEY)
                 const response = await fetch(URL_ASK_TIMON, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -142,7 +142,7 @@
 
                 const data = await response.json();
                 
-                // Trình duyệt bốc cấu trúc dữ liệu text từ Firebase trả về cực gọn
+                // ĐÃ FIX: Nhận diện cấu trúc Data bọc bởi Axios từ Backend Firebase khạc về gọn gàng
                 if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts) {
                     const replyText = data.candidates[0].content.parts[0].text;
                     
@@ -150,6 +150,13 @@
                     inputDel.disabled = false; 
                     appendMessage(replyText, 'bot');
                     chatHistory.push(`Timon: ${replyText}`);
+                    scrollToBottom();
+                } else if (typeof data === "string") {
+                    // Dự phòng nếu chuỗi trả về thẳng dạng text
+                    removeThinkingMessage();
+                    inputDel.disabled = false; 
+                    appendMessage(data, 'bot');
+                    chatHistory.push(`Timon: ${data}`);
                     scrollToBottom();
                 } else {
                     throw new Error("Lỗi định dạng cấu trúc JSON trả về.");

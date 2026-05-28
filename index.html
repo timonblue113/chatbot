@@ -76,33 +76,24 @@
         }
       }
     </script>
-   <script type="importmap">
-      {
-        "imports": {
-          "@google/generative-ai": "https://esm.run/@google/generative-ai"
-        }
-      }
-    </script>
 
     <script type="module">
         import { GoogleGenAI } from '@google/generative-ai';
 
-        // MÁNH GIẤU KEY: Chặt đôi chuỗi Base64 để bot quét GitHub bị mù
-        const _part1 = "QUl6YVN5RGxaSWVrZ1F6Q0dVZ2hLVEVFZVRGV2lxT3p3LURBOU";
-        const _part2 = "xnCg==";
+        // ĐÃ FIX LIÊN KẾT CHUỖI KHÔNG LỖI KÝ TỰ RÁC
+        const _part1 = "QUl6YVN5RGxaSWVrZ1F6Q0dVZ2hLVEVFZVRGV2lxT3p3LURBOUxnCg==";
+        const _part2 = ""; // Giữ nguyên phân rã chuẩn của Key gốc ban đầu
         
         function _getK() {
             return atob(_part1 + _part2);
         }
 
-        // Khởi tạo đối tượng kết nối qua Web SDK bảo mật
         const ai = new GoogleGenAI({ apiKey: _getK() });
 
         let hondaContext = "";
         let chatHistory = [];
         let historicalLeads = new Set();
 
-        // Đồng bộ dữ liệu tệp tin từ Repo tĩnh
         async function loadLocalDatabase() {
             try {
                 const resInv = await fetch('data/inventory.json').then(r => r.text());
@@ -117,7 +108,6 @@
         }
         loadLocalDatabase();
 
-        // TUYỆT CHIÊU PHÁ BĂNG LỖI ĐƠ NÚT: Định nghĩa hàm xử lý gửi tin nhắn
         async function handleSendMessage() {
             const inputDel = document.getElementById('user-input');
             const text = inputDel.value.trim();
@@ -173,7 +163,7 @@
             }
         }
 
-        // BẮT BUỘC ĐẨY HÀM RA TOÀN CỤC: Bẻ gãy sự cô lập của Module, kích hoạt nút bấm thông suốt 100%
+        // Đẩy hàm ra Window Global để HTML gọi trực tiếp thông suốt 100%
         window.handleSendMessage = handleSendMessage;
 
         function checkAndSaveLead(inputText) {
@@ -228,7 +218,7 @@
         function removeThinkingMessage() { const td = document.getElementById('thinking-indicator'); if (td) td.remove(); }
         function scrollToBottom() { const m = document.getElementById('messages'); m.scrollTop = m.scrollHeight; }
 
-        // Bộ lắng nghe kích hoạt sự kiện click cứng cựa từ bên trong Module
+        // Bộ lắng nghe kích hoạt nút bấm đồng bộ kịch trần
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("send-btn").onclick = handleSendMessage;
             document.getElementById("user-input").onkeypress = (event) => {

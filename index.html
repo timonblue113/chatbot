@@ -69,8 +69,8 @@
         </div>
     </div>
 
- <script>
-        // ĐÃ FIX: Thêm đuôi endpoint /askTimon và /sendLead vào chính xác link thực tế của bạn
+    <script>
+        // ĐÃ CHUẨN HÓA: Định tuyến đầy đủ endpoint cho hệ thống Cloud Run Gen 2
         const URL_ASK_TIMON = "https://asktimon-udi5dknsya-uc.a.run.app/askTimon";
         const URL_SEND_LEAD = "https://sendlead-udi5dknsya-uc.a.run.app/sendLead";
 
@@ -93,7 +93,7 @@
         }
         loadLocalDatabase();
 
-        // Hàm xử lý gửi tin nhắn chính thức
+        // Hàm xử lý gửi tin nhắn
         async function handleSendMessage() {
             const inputDel = document.getElementById('user-input');
             const text = inputDel.value.trim();
@@ -109,7 +109,7 @@
             showThinkingMessage();
             inputDel.disabled = true; 
 
-            // Giới hạn lịch sử chat gửi lên để né bộ lọc bóp băng thông TPM của Google
+            // Giới hạn 4 câu gần nhất giúp dữ liệu truyền đi cực nhẹ, chống lỗi tràn chuỗi JSON
             const limitedHistory = chatHistory.slice(-4).join("\n");
 
             const systemPrompt = `
@@ -133,7 +133,7 @@
             Timon phản hồi:`;
 
             try {
-                // BẰN TIN NHẮN QUA SERVER TRUNG GIAN FIREBASE (KHÔNG CÒN LỘ API KEY)
+                // Bắn dữ liệu lên Firebase
                 const response = await fetch(URL_ASK_TIMON, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -142,24 +142,17 @@
 
                 const data = await response.json();
                 
-                // ĐÃ FIX: Nhận diện cấu trúc Data bọc bởi Axios từ Backend Firebase khạc về gọn gàng
-                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts) {
-                    const replyText = data.candidates[0].content.parts[0].text;
+                // ĐÃ FIX: Nhận diện cấu trúc truyền tải dữ liệu text siêu sạch từ Backend mới
+                if (data && data.text) {
+                    const replyText = data.text;
                     
                     removeThinkingMessage();
                     inputDel.disabled = false; 
                     appendMessage(replyText, 'bot');
                     chatHistory.push(`Timon: ${replyText}`);
                     scrollToBottom();
-                } else if (typeof data === "string") {
-                    // Dự phòng nếu chuỗi trả về thẳng dạng text
-                    removeThinkingMessage();
-                    inputDel.disabled = false; 
-                    appendMessage(data, 'bot');
-                    chatHistory.push(`Timon: ${data}`);
-                    scrollToBottom();
                 } else {
-                    throw new Error("Lỗi định dạng cấu trúc JSON trả về.");
+                    throw new Error("Lỗi đọc định dạng dữ liệu.");
                 }
 
             } catch (error) {
@@ -191,7 +184,7 @@
             }
         }
 
-        // BẮN SĐT KHÁCH QUA ENDPOINT BẢO MẬT CỦA FIREBASE
+        // Bắn dữ liệu về Telegram ngầm qua Server
         async function sendToTelegram(leadData) {
             try {
                 await fetch(URL_SEND_LEAD, {
@@ -228,7 +221,6 @@
         function removeThinkingMessage() { const td = document.getElementById('thinking-indicator'); if (td) td.remove(); }
         function scrollToBottom() { const m = document.getElementById('messages'); m.scrollTop = m.scrollHeight; }
 
-        // Bộ lắng nghe kích hoạt sự kiện click cứng cựa ăn chắc 100%
         document.getElementById("send-btn").onclick = handleSendMessage;
         document.getElementById("user-input").onkeypress = function(event) {
             if (event.key === 'Enter') {

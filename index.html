@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Honda Ôtô Đồng Tháp - Trợ Lý Ảo ThuyHonda </title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -15,10 +15,9 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         
-        /* KHÓA CHẾT TOÀN TRANG: Sử dụng dvh để thích ứng động với bàn phím điện thoại */
+        /* KHÓA CHẾT TOÀN TRANG: Chống cuộn */
         html, body {
-            height: 100vh;
-            height: 100dvh; 
+            height: 100vh; height: 100dvh; 
             width: 100%;
             overflow: hidden; 
             position: relative;
@@ -36,94 +35,85 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover; background-position: center;
             opacity: 0;
-            filter: brightness(0.45);
+            filter: brightness(0.4);
             transition: opacity 2.0s ease-in-out; 
             z-index: 1;
         }
 
-        .bg-slider.active {
-            opacity: 1;
-            z-index: 2;
-        }
+        .bg-slider.active { opacity: 1; z-index: 2; }
         
-        /* KHUNG CHAT CHUYÊN NGHIỆP: Tự thích ứng toàn màn hình trên Mobile, bệ vệ trên Desktop */
+        /* KHUNG CHAT TỰ ĐỘNG CANH CHỈNH THEO THIẾT BỊ */
         #chat-box {
             position: relative; z-index: 5;
-            width: 100%; 
-            height: 100vh;
-            height: 100dvh; /* Điền đầy màn hình mobile khi bật bàn phím */
-            background: rgba(248, 249, 251, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            /* Mặc định trên Điện thoại: Nhỏ xíu, gọn gàng, tự canh giữa */
+            width: 90%; 
+            max-width: 360px; 
+            height: 70vh; height: 70dvh;
+            background: rgba(248, 249, 251, 0.88); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             display: flex; flex-direction: column; overflow: hidden;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
         }
 
-        /* Giao diện Đẹp bệ vệ khi hiển thị trên Máy tính (Desktop) */
-        @media (min-width: 481px) {
+        /* Tự động mở rộng kích thước phù hợp hơn khi lên Máy tính (Desktop) */
+        @media (min-width: 768px) {
             #chat-box { 
-                width: 92%;
-                max-width: 430px; 
-                height: 85vh; 
-                max-height: 750px;
-                border-radius: 24px; 
-                border: 1px solid rgba(255, 255, 255, 0.25);
-                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+                max-width: 420px; 
+                height: 80vh;
             }
         }
 
-        /* FIX CỐ ĐỊNH TIÊU ĐỀ: Không bao giờ bị đẩy mất */
         #chat-header { 
             background-color: var(--honda-red); 
             color: var(--honda-white); 
-            padding: 16px 20px; 
+            padding: 14px 18px; 
             display: flex; justify-content: space-between; align-items: center; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            z-index: 10; 
-            flex-shrink: 0; /* Khóa chết kích thước tiêu đề */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            z-index: 10;
+            flex-shrink: 0;
         }
-        #chat-header h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.2px; }
-        #chat-header span { font-size: 0.78rem; opacity: 0.85; display: block; margin-top: 2px; }
+        #chat-header h1 { font-size: 1.05rem; font-weight: 600; letter-spacing: 0.2px; }
+        #chat-header span { font-size: 0.75rem; opacity: 0.85; display: block; margin-top: 2px; }
 
-        /* VÙNG CUỘN TIN NHẮN TỰ CO GIÃN ĐỘNG */
+        /* VÙNG CUỘN TIN NHẮN NỘI KHU */
         #messages { 
-            flex: 1; 
-            padding: 16px; 
+            flex: 1; padding: 14px; 
             overflow-y: auto; 
-            display: flex; flex-direction: column; gap: 14px; 
+            display: flex; flex-direction: column; gap: 12px; 
             scroll-behavior: smooth; 
             -webkit-overflow-scrolling: touch; 
         }
         
-        .msg { padding: 11px 15px; border-radius: 18px; font-size: 0.95rem; line-height: 1.48; max-width: 85%; word-wrap: break-word; }
+        .msg { padding: 10px 14px; border-radius: 16px; font-size: 0.9rem; line-height: 1.45; max-width: 85%; word-wrap: break-word; }
         .user { background-color: var(--bg-user-msg); color: var(--honda-white); align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 3px 8px rgba(204, 0, 0, 0.15); }
         .bot { background-color: var(--bg-bot-msg); color: var(--honda-black); align-self: flex-start; border-top-left-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.04); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); }
         
-        /* THANH NHẬP LIỆU CHUẨN ĐẸP TRÊN MOBILE */
+        /* THANH NHẬP LIỆU GỌN GÀNG */
         #input-area { 
-            display: flex; 
-            padding: 12px 16px; 
-            border-top: 1px solid rgba(0, 0, 0, 0.06); 
-            background-color: rgba(255, 255, 255, 1); 
-            align-items: center; 
-            gap: 10px; 
-            z-index: 10;
-            flex-shrink: 0; /* Giữ nguyên kích thước thanh nhập liệu */
-            padding-bottom: calc(12px + env(safe-area-inset-bottom)); 
+            display: flex; padding: 10px 14px; border-top: 1px solid rgba(0, 0, 0, 0.06); 
+            background-color: rgba(255, 255, 255, 1); align-items: center; gap: 8px; z-index: 10;
+            flex-shrink: 0;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
         }
         #user-input { 
-            flex: 1; 
-            padding: 12px 18px; 
-            border: 1px solid rgba(0, 0, 0, 0.1); 
-            border-radius: 24px; 
-            outline: none; 
-            background-color: #f0f2f5; 
-            font-size: 1rem; /* Chống tự động zoom-in lỗi giao diện trên iOS */
-            transition: all 0.2s; 
+            flex: 1; padding: 10px 16px; 
+            border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 24px; 
+            outline: none; background-color: #f0f2f5; 
+            font-size: 0.95rem; transition: all 0.2s; 
         }
         #user-input:focus { border-color: var(--honda-red); background-color: var(--honda-white); }
-        #send-btn { background-color: var(--honda-red); color: var(--honda-white); border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(204, 0, 0, 0.15); }
+        
+        #send-btn { 
+            background-color: var(--honda-red); color: var(--honda-white); 
+            border: none; width: 40px; height: 40px; border-radius: 50%; 
+            cursor: pointer; display: flex; justify-content: center; align-items: center; 
+            font-size: 1rem; flex-shrink: 0; box-shadow: 0 3px 8px rgba(204, 0, 0, 0.15); 
+        }
         #user-input:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .thinking-msg { display: flex; gap: 5px; padding: 12px 18px; border-radius: 18px; background-color: var(--bg-bot-msg); align-self: flex-start; border-top-left-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.03); width: fit-content; }
-        .dot { width: 7px; height: 7px; background-color: rgba(0, 0, 0, 0.4); border-radius: 50%; animation: bounce 1.3s infinite ease-in-out; }
+        .thinking-msg { display: flex; gap: 5px; padding: 10px 14px; border-radius: 16px; background-color: var(--bg-bot-msg); align-self: flex-start; border-top-left-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.03); width: fit-content; }
+        .dot { width: 6px; height: 6px; background-color: rgba(0, 0, 0, 0.4); border-radius: 50%; animation: bounce 1.3s infinite ease-in-out; }
         .dot:nth-child(1) { animation-delay: -0.32s; }
         .dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
@@ -143,7 +133,7 @@
                 <h1>Honda Ôtô Đồng Tháp</h1>
                 <span>Trợ lý ảo Thúy trực tuyến di động</span>
             </div>
-            <div style="font-size: 1.5rem;">🚗</div>
+            <div style="font-size: 1.3rem;">🚗</div>
         </div>
 
         <div id="messages">
@@ -155,7 +145,7 @@
         </div>
 
         <div id="input-area">
-            <input type="text" id="user-input" placeholder="Hỏi Thúy về giá xe, khuyến mãi, trả góp...">
+            <input type="text" id="user-input" placeholder="Hỏi Thúy về giá xe, khuyến mãi...">
             <button type="button" id="send-btn">➤</button>
         </div>
     </div>
@@ -187,7 +177,7 @@
                 const resPromo = await fetch('data/promotion.json').then(r => r.text()).catch(() => "Hiện tại chưa cập nhật gói ưu đãi mới.");
 
                 hondaContext = `=== DATA ĐẠI LÝ ===\n${resInv}\n${resPrice}\n${resService}\n=== CHƯƠNG TRÌNH KHUYẾN MÃI ===\n${resPromo}`;
-                console.log("Database nạp đầy đủ bao gồm Khuyến mãi thành công!");
+                console.log("Database nạp đầy đủ thành công!");
             } catch (e) {
                 console.error("Lỗi nạp database:", e);
                 hondaContext = "Dữ liệu đại lý tạm thời chưa đồng bộ.";
@@ -264,7 +254,7 @@
                 console.error("API Error:", error);
                 removeThinkingMessage();
                 inputDel.disabled = false; 
-                appendMessage('Hệ thống xử lý thông tin đang bận cập nhật dữ liệu bảng giá. Anh/Chị vui lòng thử lại sau giây lát hoặc để lại số điện thoại để Thúy hỗ trợ ngay nhé! 🥺', 'bot');
+                appendMessage('Hệ thống đang bận cập nhật dữ liệu bảng giá. Anh/Chị vui lòng thử lại sau giây lát hoặc để lại số điện thoại để Thúy hỗ trợ ngay nhé! 🥺', 'bot');
                 scrollToBottom();
             }
         }

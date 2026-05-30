@@ -54,9 +54,8 @@
         /* KHUNG CHAT TỰ ĐỘNG CANH CHỈNH THEO THIẾT BỊ */
         #chat-box {
             position: relative; z-index: 5;
-            /* Mặc định trên Điện thoại: Nhỏ xíu, gọn gàng, tự canh giữa */
             width: 90%; 
-            max-width: 600px; 
+            max-width: 650px; 
             height: 90vh; height: 90dvh;
             background: rgba(248, 249, 251, 0.88); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             display: flex; flex-direction: column; overflow: hidden;
@@ -65,7 +64,6 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
         }
 
-        /* Tự động mở rộng kích thước phù hợp hơn khi lên Máy tính (Desktop) */
         @media (min-width: 768px) {
             #chat-box { 
                 max-width: 420px; 
@@ -115,7 +113,7 @@
         
         #send-btn { 
             background-color: var(--honda-red); color: var(--honda-white); 
-            border: none; width: 40px; height: 40px; border-radius: 50%; 
+            border: none; width: 50px; height: 40px; border-radius: 50%; 
             cursor: pointer; display: flex; justify-content: center; align-items: center; 
             font-size: 1rem; flex-shrink: 0; box-shadow: 0 3px 8px rgba(204, 0, 0, 0.15); 
         }
@@ -212,6 +210,7 @@
 
             const limitedHistory = String(chatHistory.slice(-4).join("\n"));
 
+            // ĐÃ CẬP NHẬT: Thêm quy tắc số 5 về việc yêu cầu lái thử
             const systemPrompt = `
             Bạn là một Chuyên viên tư vấn ảo cao cấp tên là Thúy, làm việc tại đại lý Ô tô Honda Đồng Tháp.
             Nhiệm vụ của bạn là tư vấn bán hàng, giải đáp thông số, tính toán chi phí, áp dụng các ưu đãi khuyến mãi và chốt hẹn khách hàng mua xe dựa trên cơ sở dữ liệu dưới đây.
@@ -226,6 +225,7 @@
             2. Chỉ tư vấn thông tin dựa trên dữ liệu được cung cấp. Nếu khách hỏi thông tin hoang đường hoặc các nhân vật lạ không có trong hệ thống, hãy lịch sự từ chối khéo và hướng cuộc trò chuyện về các dòng xe Honda (City, Civic, CR-V, HR-V, BR-V, Accord).
             3. Khi khách hỏi về ưu đãi hoặc giá xe, hãy chủ động cào thông tin Khuyến mãi từ phần "CHƯƠNG TRÌNH KHUYẾN MÃI" để tăng sức thuyết phục, đồng thời gài khách để lại số điện thoại/Zalo để phòng kinh doanh gửi bảng giá kịch sàn hôm nay.
             4. Tính toán chi phí lăn bánh: Lấy giá niêm yết của xe từ inventory.json, tính thuế trước bạ 10%, phí biển số khu vực II (1,000,000đ cho Cao Lãnh) hoặc khu vực III (200,000đ cho Huyện), kết hợp cộng các phí cố định (Kiểm định: 230k, Đường bộ: 1560k, Bảo hiểm TNDS: 480.7k). In rõ ràng phép tính tổng ra màn hình.
+            5. GỢI Ý LÁI THỬ (QUAN TRỌNG): Sau khi tư vấn chi tiết xong về một dòng xe bất kỳ, bắt buộc phải mỉm cười và hỏi thêm khách một câu: "Anh/Chị có muốn đăng ký lái thử dòng xe này không ạ? Cứ để lại số điện thoại, Thúy sẽ sắp xếp mang xe qua tận nhà cho Anh/Chị trải nghiệm nhé!"
 
             Lịch sử cuộc trò chuyện gần đây:
             ${limitedHistory}
@@ -269,18 +269,26 @@
             }
         }
 
+        // ĐÃ CẬP NHẬT: Nhận diện yêu cầu lái thử và phân loại Lead trước khi gửi Telegram
         function checkAndSaveLead(inputText) {
             const phoneRegex = /(03|05|07|08|09|01[2|6|8|9])+([0-9]{8})\b/g;
             const foundPhones = inputText.match(phoneRegex);
+            
+            // Tìm các từ khóa cho thấy khách hàng có ý định lái thử
+            const isTestDriveIntent = /lái thử|chạy thử|trải nghiệm|đem xe|mang xe|đăng ký|có/i.test(inputText);
 
             if (foundPhones) {
                 foundPhones.forEach(phone => {
                     if (!historicalLeads.has(phone)) {
                         historicalLeads.add(phone);
+                        
+                        // Gắn tag nổi bật nếu nội dung có yếu tố muốn lái thử
+                        const leadPrefix = isTestDriveIntent ? "[🚗 YÊU CẦU LÁI THỬ] " : "[📞 KHÁCH QUAN TÂM XE] ";
+
                         const newLead = {
                             time: new Date().toLocaleString('vi-VN'),
                             phone: phone,
-                            rawContent: inputText
+                            rawContent: leadPrefix + inputText
                         };
                         sendToTelegram(newLead); 
                     }

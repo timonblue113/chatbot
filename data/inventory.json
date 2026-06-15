@@ -3,13 +3,11 @@
     "Honda City": {
       "segments": "Sedan 5 chỗ hạng B",
       "versions": {
-        "G": {"price_niemyet": 499000000, "engine": "1.5L DOHC i-VTEC", "transmission": "CVT"},
-        "L": {"price_niemyet": 547000000, "engine": "1.5L DOHC i-VTEC", "transmission": "CVT"},
-        "RS": {"price_niemyet": 577000000, "engine": "1.5L DOHC i-VTEC", "transmission": "CVT"}
+        CITY G ĐEN ,XÁM, TRẮNG : 499 triệu .
+        CITY L : ĐEN, XÁM, TRẮNG, TITAN, XANH : 539 Triệu, ĐỎ : 547 triệu
+        CITY RS : ĐEN, XÁM, TRẮNG , XANH, TITAN : 569 triệu, ĐỎ :577 triệu
       },
-CITY G ĐEN ,XÁM, TRẮNG : 499TR .
-CITY L : ĐEN, XÁM, TRẮNG, TITAN, XANH : 539TR, ĐỎ : 547TR
-CITY RS : ĐEN, XÁM, TRẮNG , XANH, TITAN : 569TR, ĐỎ :577TR
+
 
 
       

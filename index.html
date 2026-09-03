@@ -12,7 +12,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Honda Ôtô Đồng Tháp - Trợ Lý Ảo ThuyHonda </title>
+    <title>Honda Ôtô Đồng Tháp - Trợ Lý Ảo Dương Honda </title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -145,14 +145,14 @@
             <div>
                 <h1>Honda Ôtô Đồng Tháp <br> 
                 Call/zalo: 0898 945 468 </h1>
-                <span>Trợ lý ảo Thúy trực tuyến di động</span>
+                <span>Trợ lý ảo Dương trực tuyến di động</span>
             </div>
             <div style="font-size: 1.3rem;">🚗</div>
         </div>
 
         <div id="messages">
             <div class="msg bot">
-                🚗 Kính chào Anh/Chị! Tôi là <strong>Thúy bán xe</strong> - Trợ lý công nghệ số của đại lý Honda Ôtô Đồng Tháp.<br><br>
+                🚗 Kính chào Anh/Chị! Tôi là <strong>Dương  bán xe</strong> - Trợ lý công nghệ số của đại lý Honda Ôtô Đồng Tháp.<br><br>
                 Hôm nay tôi có thể hỗ trợ Anh/Chị thông tin chi tiết về giá xe, chi phí lăn bánh hay các **Chương trình khuyến mãi** của dòng xe nào ạ?<br>
                 Hotline: 0898.945.468 để gặp trực tiếp Anh/chị nhé !
                 <em>(City, Civic, CR-V, HR-V, BR-V, Accord)</em>
@@ -160,7 +160,7 @@
         </div>
 
         <div id="input-area">
-            <input type="text" id="user-input" placeholder="Hỏi Thúy về giá xe, khuyến mãi...">
+            <input type="text" id="user-input" placeholder="Hỏi Dương  về giá xe, khuyến mãi...">
             <button type="button" id="send-btn">➤</button>
         </div>
     </div>
@@ -219,7 +219,7 @@
 
             // ĐÃ CẬP NHẬT: Thêm quy tắc số 5 về việc yêu cầu lái thử
             const systemPrompt = `
-            Bạn là một Chuyên viên tư vấn ảo cao cấp tên là Thúy, làm việc tại đại lý Ô tô Honda Đồng Tháp.
+            Bạn là một Chuyên viên tư vấn ảo cao cấp tên là Dương , làm việc tại đại lý Ô tô Honda Đồng Tháp.
             Nhiệm vụ của bạn là tư vấn bán hàng, giải đáp thông số, tính toán chi phí, áp dụng các ưu đãi khuyến mãi và chốt hẹn khách hàng mua xe dựa trên cơ sở dữ liệu dưới đây.
 
             ---
@@ -230,14 +230,14 @@
             QUY TẮC TƯ DUY VÀ XỬ LÝ TOÁN HỌC (BẮT BUỘC):
             1. Trò chuyện tự nhiên, chuyên nghiệp như một tư vấn viên ô tô lão luyện. KHÔNG trả lời rập khuôn máy móc.
             2. Chỉ tư vấn thông tin dựa trên dữ liệu được cung cấp. Nếu khách hỏi thông tin hoang đường hoặc các nhân vật lạ không có trong hệ thống, hãy lịch sự từ chối khéo và hướng cuộc trò chuyện về các dòng xe Honda (City, Civic, CR-V, HR-V, BR-V, Accord).
-            3. Khi khách hỏi về ưu đãi hoặc giá xe, hãy chủ động cào thông tin Khuyến mãi từ phần "CHƯƠNG TRÌNH KHUYẾN MÃI" để tăng sức thuyết phục, đồng thời gài khách để lại số điện thoại/Zalo để phòng kinh doanh gửi bảng giá kịch sàn hôm nay.
+            3. Khi khách hỏi về ưu đãi hoặc giá xe, hãy chủ động cào thông tin Khuyến mãi từ phần "CHƯƠNG TRÌNH KHUYẾN MÃI" để tăng sức Dươngết phục, đồng thời gài khách để lại số điện thoại/Zalo để phòng kinh doanh gửi bảng giá kịch sàn hôm nay.
             4. Tính toán chi phí lăn bánh: Lấy giá niêm yết của xe từ inventory.json, tính thuế trước bạ 10%, phí biển số khu vực II (1,000,000đ cho Cao Lãnh) hoặc khu vực III (200,000đ cho Huyện), kết hợp cộng các phí cố định (Kiểm định: 230k, Đường bộ: 1560k, Bảo hiểm TNDS: 480.7k). In rõ ràng phép tính tổng ra màn hình.
-            5. GỢI Ý LÁI THỬ (QUAN TRỌNG): Sau khi tư vấn chi tiết xong về một dòng xe bất kỳ, bắt buộc phải mỉm cười và hỏi thêm khách một câu: "Anh/Chị có muốn đăng ký lái thử dòng xe này không ạ? Cứ để lại số điện thoại, Thúy sẽ sắp xếp mang xe qua tận nhà cho Anh/Chị trải nghiệm nhé!"
+            5. GỢI Ý LÁI THỬ (QUAN TRỌNG): Sau khi tư vấn chi tiết xong về một dòng xe bất kỳ, bắt buộc phải mỉm cười và hỏi thêm khách một câu: "Anh/Chị có muốn đăng ký lái thử dòng xe này không ạ? Cứ để lại số điện thoại, Dương  sẽ sắp xếp mang xe qua tận nhà cho Anh/Chị trải nghiệm nhé!"
 
             Lịch sử cuộc trò chuyện gần đây:
             ${limitedHistory}
 
-            Thúy phản hồi:`;
+            Dương  phản hồi:`;
 
             try {
                 const response = await fetch(URL_ASK_TIMON, {
@@ -264,14 +264,14 @@
                 appendMessage(replyText, 'bot');
                 inputDel.focus();
                 
-                chatHistory.push(`Thúy: ${replyText}`);
+                chatHistory.push(`Dương : ${replyText}`);
                 scrollToBottom();
 
             } catch (error) {
                 console.error("API Error:", error);
                 removeThinkingMessage();
                 inputDel.disabled = false; 
-                appendMessage('Hệ thống đang bận cập nhật dữ liệu bảng giá. Anh/Chị vui lòng thử lại sau giây lát hoặc để lại số điện thoại để Thúy hỗ trợ ngay nhé! 🥺', 'bot');
+                appendMessage('Hệ thống đang bận cập nhật dữ liệu bảng giá. Anh/Chị vui lòng thử lại sau giây lát hoặc để lại số điện thoại để Dương  hỗ trợ ngay nhé! 🥺', 'bot');
                 scrollToBottom();
             }
         }
